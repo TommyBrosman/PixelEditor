@@ -6,18 +6,13 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <div className="wrapper">
+          <div className="grid-item">One</div>
+          <div className="grid-item">Two</div>
+          <div className="grid-item">Three</div>
+          <div className="grid-item">Four</div>
+          <div className="grid-item">Five</div>
+        </div>
       </header>
     </div>
   );
