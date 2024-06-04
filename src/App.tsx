@@ -1,18 +1,12 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import { Grid } from './Grid';
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <div className="wrapper">
-          <div className="grid-item">One</div>
-          <div className="grid-item">Two</div>
-          <div className="grid-item">Three</div>
-          <div className="grid-item">Four</div>
-          <div className="grid-item">Five</div>
-        </div>
+        <Grid />
       </header>
     </div>
   );
