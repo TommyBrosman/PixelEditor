@@ -1,31 +1,21 @@
-import type React from 'react';
-import { useCallback, useRef, useState } from 'react';
+import React from 'react';
 import './Grid.css';
+import { appReducer, ActionName, initialAppState } from './Reducers';
 
 export function Grid() {
-  const [forceRender, setForceRender] = useState(false);
-  const initialItemBoard = [
-    [0, 0, 0, 1, 1, 0, 0, 0],
-    [0, 0, 1, 0, 0, 1, 0, 0],
-    [0, 0, 1, 0, 0, 1, 0, 0],
-    [0, 1, 0, 0, 0, 0, 1, 0],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [0, 0, 0, 1, 1, 0, 0, 0],
-    [0, 0, 1, 0, 0, 1, 0, 0],
-    [0, 0, 1, 0, 0, 1, 0, 0]];
-  const itemBoardRef = useRef(initialItemBoard);
+  const [state, dispatch] = React.useReducer(appReducer, { ...initialAppState });
 
   const items = [...Array(64)].map((_, i) => {
     const x = i % 8;
     const y = Math.floor(i / 8);
-    const entry = itemBoardRef.current[y][x];
+    const entry = state.itemBoard[y][x];
 
     const onClickCell = () => {
-      // Flip the color
-      itemBoardRef.current[y][x] = 1 - itemBoardRef.current[y][x];
-
-      // Tell React to re-render (note: won't be needed if the grid is passed down from a parent component)
-      setForceRender(!forceRender);
+      dispatch({
+        type: ActionName.TOGGLE_CELL_VALUE,
+        x,
+        y
+      });
     }
 
     const key = `${x},${y}`;
@@ -34,7 +24,7 @@ export function Grid() {
     // biome-ignore lint/a11y/useKeyWithClickEvents: Non-useful event.
     return (<div className={className} key={key} onClick={onClickCell} />);
   });
-  
+
   return (
     <div className="grid">
       {items}
