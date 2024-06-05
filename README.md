@@ -2,6 +2,8 @@
 
 An editor for making pixel art built on top of the Fluid Framework and React.
 
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
 ## Available Scripts
 
 In the project directory, you can run:
