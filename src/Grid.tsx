@@ -19,7 +19,7 @@ export function Grid() {
     const x = i % 8;
     const y = Math.floor(i / 8);
     const entry = itemBoardRef.current[y][x];
-    const className = entry === 0 ? 'grid-item-black' : 'grid-item-white';
+
     const onClickCell = () => {
       // Flip the color
       itemBoardRef.current[y][x] = 1 - itemBoardRef.current[y][x];
@@ -29,10 +29,12 @@ export function Grid() {
     }
 
     const key = `${x},${y}`;
+    const className = entry === 0 ? 'grid-item-black' : 'grid-item-white';
 
     // biome-ignore lint/a11y/useKeyWithClickEvents: Non-useful event.
     return (<div className={className} key={key} onClick={onClickCell} />);
   });
+  
   return (
     <div className="grid">
       {items}
