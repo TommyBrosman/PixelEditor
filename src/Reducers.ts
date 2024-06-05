@@ -12,21 +12,21 @@ const initialItemBoard: number[][] = [
  * Holds app state.
  */
 export interface AppState {
-    itemBoard: number[][]
+    itemBoard: number[][];
 };
 
 /**
  * The initial app state. Copied but not modified directly.
  */
 export const initialAppState: AppState = {
-    itemBoard: initialItemBoard
+    itemBoard: initialItemBoard;
 };
 
 /**
  * All supported action names.
  */
 export enum ActionName {
-    TOGGLE_CELL_VALUE = "TOGGLE_CELL_VALUE"
+    TOGGLE_CELL_VALUE = "TOGGLE_CELL_VALUE";
 };
 
 /**
