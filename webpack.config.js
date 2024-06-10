@@ -7,9 +7,6 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = (env) => {
-	const htmlTemplate = "./public/index.html";
-	const plugins = [new HtmlWebpackPlugin({ template: htmlTemplate })];
-
 	const mode = env?.prod ? "production" : "development";
 
 	return {
@@ -58,6 +55,7 @@ module.exports = (env) => {
 			new HtmlWebpackPlugin({
 				title: "Pixel Editor",
 				favicon: "",
+				template: "./src/index.html"
 			}),
 		],
 		devServer: {
