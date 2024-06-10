@@ -28,8 +28,7 @@ export const initialAppState: AppState = {
  * All supported action names.
  */
 export enum ActionName {
-	TOGGLE_CELL_VALUE = "TOGGLE_CELL_VALUE",
-	SUBSCRIBE_TO_FLUID_EVENTS = "SUBSCRIBE_TO_FLUID_EVENTS"
+	TOGGLE_CELL_VALUE = "TOGGLE_CELL_VALUE"
 };
 
 /**
@@ -39,13 +38,6 @@ export interface ToggleCellValueAction {
 	type: ActionName.TOGGLE_CELL_VALUE;
 	x: number;
 	y: number;
-}
-
-/**
- * Sets up the Fluid event subscriptions.
- */
-export interface SubscribeToFluidEventsAction {
-	type: ActionName.SUBSCRIBE_TO_FLUID_EVENTS;
 }
 
 /**
