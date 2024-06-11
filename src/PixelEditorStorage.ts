@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-globals */
 import { SharedTree, TreeConfiguration, SchemaFactory, type TreeView } from "fluid-framework";
-import { TinyliciousClient } from "@fluidframework/tinylicious-client";
+import { TinyliciousClient } from "@fluidframework/tinylicious-client/internal";
 
 const client = new TinyliciousClient();
 const containerSchema = {
