@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-globals */
 import { SharedTree, TreeConfiguration, SchemaFactory, type TreeView } from "fluid-framework";
-import { TinyliciousClient } from "@fluidframework/tinylicious-client/internal";
+import { TinyliciousClient } from "@fluidframework/tinylicious-client";
 
 const client = new TinyliciousClient();
 const containerSchema = {
@@ -38,6 +38,10 @@ const loadExistingPixelEditor = async (id: string): Promise<TreeView<typeof Pixe
     return pixelEditorTreeView;
 };
 
+/**
+ * Join or start a Shared Tree session.
+ * @returns The Tree View.
+ */
 export const start = async (): Promise<TreeView<typeof PixelEditorSchema>> => {
     let pixelEditorTreeView: TreeView<typeof PixelEditorSchema> | undefined;
 	if (location.hash) {
@@ -49,4 +53,45 @@ export const start = async (): Promise<TreeView<typeof PixelEditorSchema>> => {
 	}
 
     return pixelEditorTreeView;
+}
+
+/**
+ * Create a key for indexing into the board Shared Tree.
+ * @param x x index
+ * @param y y index
+ * @returns The cell value.
+ */
+export const getKey = (x: number, y: number) => `${x},${y}`;
+
+/**
+ * Get the current board from Shared Tree.
+ * @param pixelEditorTreeView The Tree View to read from.
+ * @returns The board.
+ */
+export const getBoardFromSharedTree = (pixelEditorTreeView: TreeView<typeof PixelEditorSchema>): number[][] => {
+	const board: number[][] = new Array();
+	for (let y = 0; y < 8; y++) {
+		const row = new Array();
+		for (let x = 0; x < 8; x++) {
+			const cell = pixelEditorTreeView.root.board.get(getKey(x, y));
+			row.push(cell);
+		}
+		board.push(row);
+	}
+
+	return board;
+}
+
+/**
+ * Set the copy of the board in Shared Tree.
+ * @param pixelEditorTreeView The Tree View whose underlying tree is to be modified.
+ * @param board The board.
+ */
+export const setBoardInSharedTree = (pixelEditorTreeView: TreeView<typeof PixelEditorSchema>, board: number[][]): void => {
+	for (let y = 0; y < 8; y++) {
+		for (let x = 0; x < 8; x++) {
+			const cell = board[y][x];
+			pixelEditorTreeView.root.board.set(getKey(x, y), cell);
+		}
+	}
 }
