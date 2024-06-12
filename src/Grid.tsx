@@ -1,9 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './Grid.css';
-import { appReducer, ActionName, initialAppState } from './store/Reducers';
+import { ActionName, thunkConnectToFluid } from './store/Reducers';
+import { useAppDispatch, useAppSelector } from './store/Hooks';
 
 export function Grid() {
-	const [state, dispatch] = React.useReducer(appReducer, { ...initialAppState });
+	const state = useAppSelector(state => state);
+	const dispatch = useAppDispatch();
+
+	useEffect(() => {
+		dispatch(thunkConnectToFluid(dispatch, () => state));
+	})
 
 	const items = [...Array(64)].map((_, i) => {
 		const x = i % 8;

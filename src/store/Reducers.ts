@@ -1,3 +1,6 @@
+import { Tree, type TreeView } from "fluid-framework";
+import { type PixelEditorSchema, getBoardFromSharedTree, setBoardInSharedTree, start } from "./PixelEditorStorage";
+import { type ThunkAction, configureStore } from "@reduxjs/toolkit";
 
 const initialItemBoard: number[][] = [
 	[0, 0, 0, 1, 1, 0, 0, 0],
@@ -15,13 +18,15 @@ const initialItemBoard: number[][] = [
  */
 export interface AppState {
 	itemBoard: number[][];
+	pixelEditorTreeView: TreeView<typeof PixelEditorSchema> | undefined;
 };
 
 /**
  * The initial app state. Copied but not modified directly.
  */
 export const initialAppState: AppState = {
-	itemBoard: initialItemBoard
+	itemBoard: initialItemBoard,
+	pixelEditorTreeView: undefined
 };
 
 /**
@@ -29,7 +34,10 @@ export const initialAppState: AppState = {
  */
 export enum ActionName {
 	TOGGLE_CELL_VALUE = "TOGGLE_CELL_VALUE",
-	SUBSCRIBE_TO_FLUID_EVENTS = "SUBSCRIBE_TO_FLUID_EVENTS"
+	SUBSCRIBE_TO_FLUID_EVENTS = "SUBSCRIBE_TO_FLUID_EVENTS",
+	CONNECT_TO_FLUID = "CONNECT_TO_FLUID",
+	APPLY_REMOTE_TREE_CHANGE = "APPLY_REMOTE_TREE_CHANGE",
+	BROADCAST_LOCAL_TREE_CHANGE = "BROADCAST_LOCAL_TREE_CHANGE"
 };
 
 /**
@@ -44,14 +52,28 @@ export interface ToggleCellValueAction {
 /**
  * Sets up the Fluid event subscriptions.
  */
-export interface SubscribeToFluidEventsAction {
-	type: ActionName.SUBSCRIBE_TO_FLUID_EVENTS;
+export interface ConnectToFluidAction {
+	type: ActionName.CONNECT_TO_FLUID;
+	pixelEditorTreeView: TreeView<typeof PixelEditorSchema>;
+}
+
+/**
+ * An action that sets the value of a cell on the board. Triggered by a remote change.
+ */
+export interface ApplyRemoteTreeChangeAction {
+	type: ActionName.APPLY_REMOTE_TREE_CHANGE;
+	board: number[][];
+}
+
+export interface BroadcastLocalTreeChangeAction {
+	type: ActionName.BROADCAST_LOCAL_TREE_CHANGE;
+	board: number[][];
 }
 
 /**
  * All actions supported by the root reducer.
  */
-export type Action = ToggleCellValueAction;
+export type ActionTypes = ToggleCellValueAction | ConnectToFluidAction | ApplyRemoteTreeChangeAction | BroadcastLocalTreeChangeAction;
 
 /**
  * The root reducer for the application.
@@ -59,14 +81,33 @@ export type Action = ToggleCellValueAction;
  * @param action The action being applied to the state.
  * @returns The new state.
  */
-export function appReducer(state: AppState, action: Action): AppState | undefined {
+
+// biome-ignore lint/style/useDefaultParameterLast: <explanation>
+export function appReducer(state: AppState = initialAppState, action: ActionTypes): AppState {
 	switch (action.type) {
 		case ActionName.TOGGLE_CELL_VALUE:
 			return toggleCellValue(state, action);
+		case ActionName.CONNECT_TO_FLUID:
+			return connectToFluid(state, action);
+		case ActionName.APPLY_REMOTE_TREE_CHANGE:
+			return applyRemoteTreeChange(state, action);
+		case ActionName.BROADCAST_LOCAL_TREE_CHANGE:
+			return broadcastLocalTreeChange(state, action);
 		default:
 			return state;
 	}
 }
+
+export const store = configureStore({
+	reducer: appReducer
+});
+
+// Get the type of our store variable
+export type AppStore = typeof store;
+// Infer the `RootState` and `AppDispatch` types from the store itself
+export type RootState = ReturnType<AppStore['getState']>;
+// Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
+export type AppDispatch = AppStore['dispatch'];
 
 function toggleCellValue(state: AppState, action: ToggleCellValueAction): AppState {
 	const { x, y } = action;
@@ -83,4 +124,46 @@ function toggleCellValue(state: AppState, action: ToggleCellValueAction): AppSta
 	// Preserve other elements of the state object
 	const { itemBoard, ...other } = state;
 	return { itemBoard: newItemBoard, ...other };
+}
+
+export const thunkConnectToFluid =
+	(dispatch, getState): ThunkAction<void, AppState, unknown, ActionTypes> =>
+		async dispatch => {
+			const pixelEditorTreeView = await start();
+			Tree.on(pixelEditorTreeView.root, "treeChanged", () => {
+				const currentBoard = getBoardFromSharedTree(pixelEditorTreeView)
+				dispatch({
+					type : ActionName.APPLY_REMOTE_TREE_CHANGE,
+					board: currentBoard
+				});
+			});
+
+			dispatch({
+				type: ActionName.CONNECT_TO_FLUID,
+				pixelEditorTreeView
+			});
+		}
+
+
+function connectToFluid(state: AppState, action: ConnectToFluidAction): AppState {
+	const { pixelEditorTreeView } = action;
+
+	// Preserve other elements of the state object
+	const { pixelEditorTreeView: _, ...other } = state;
+	return { pixelEditorTreeView, ...other };
+}
+
+function broadcastLocalTreeChange(state: AppState, action: BroadcastLocalTreeChangeAction): AppState {
+	if (state.pixelEditorTreeView === undefined) {
+		// TODO: Should this throw?
+		return state;
+	}
+	setBoardInSharedTree(state.pixelEditorTreeView, action.board);
+	return state;
+}
+
+function applyRemoteTreeChange(state: AppState, action: ApplyRemoteTreeChangeAction): AppState {
+	// Preserve other elements of the state object
+	const { itemBoard, ...other } = state;
+	return { itemBoard: action.board, ...other };
 }
