@@ -1,4 +1,4 @@
-import type { Store } from "redux";
+import type { Middleware, MiddlewareAPI, Store } from "redux";
 import { Tree } from "fluid-framework";
 import { getBoardFromSharedTree, setBoardInSharedTree, start } from "./PixelEditorStorage";
 import type { AppState } from "./Reducers";
@@ -21,7 +21,7 @@ export interface LocalTreeChangeAction {
 	board: number[][];
 }
 
-export const createFluidMiddleware = () => {
+export const createFluidMiddleware: Middleware<unknown, AppState> = () => {
 	return async (storeAPI: Store<AppState>) => {
 		const pixelEditorTreeView = await start();
 
@@ -42,7 +42,6 @@ export const createFluidMiddleware = () => {
         });
 
 		return next => action => {
-
 			if (action.type === FluidMiddlewareActionName.LOCAL_TREE_CHANGE) {
 				setBoardInSharedTree(pixelEditorTreeView, action.board);
 				return;
@@ -55,25 +54,6 @@ export const createFluidMiddleware = () => {
 
 			return next(action);
 		}
-		/*
-        let socket = createMyWebsocket(url);
-
-        socket.on("message", (message) => {
-            storeAPI.dispatch({
-                type : "SOCKET_MESSAGE_RECEIVED",
-                payload : message
-            });
-        });
-
-        return next => action => {
-            if(action.type == "SEND_WEBSOCKET_MESSAGE") {
-                socket.send(action.payload);
-                return;
-            }
-
-            return next(action);
-        }
-		*/
 	}
 
 	function setBoardInState(state: AppState, action: RemoteTreeChangeAction): AppState {

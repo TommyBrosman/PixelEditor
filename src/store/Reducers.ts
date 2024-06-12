@@ -59,12 +59,12 @@ export type Action = ToggleCellValueAction;
  * @param action The action being applied to the state.
  * @returns The new state.
  */
-export function appReducer(state: AppState, action: Action): AppState {
+export function appReducer(state: AppState, action: Action): AppState | undefined {
 	switch (action.type) {
 		case ActionName.TOGGLE_CELL_VALUE:
 			return toggleCellValue(state, action);
 		default:
-			return state
+			return state;
 	}
 }
 
