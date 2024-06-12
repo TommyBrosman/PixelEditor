@@ -1,6 +1,6 @@
 import React from 'react';
 import './Grid.css';
-import { appReducer, ActionName, initialAppState } from './Reducers';
+import { appReducer, ActionName, initialAppState } from './store/Reducers';
 
 export function Grid() {
 	const [state, dispatch] = React.useReducer(appReducer, { ...initialAppState });
