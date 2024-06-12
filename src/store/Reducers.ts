@@ -102,11 +102,10 @@ export const store = configureStore({
 	reducer: appReducer
 });
 
-// Get the type of our store variable
+// Get the type of our store variable as well as the RootState type that matches the store and an AppDispatch type that includes
+// the thunk dispatcher signature.
 export type AppStore = typeof store;
-// Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<AppStore['getState']>;
-// Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
 export type AppDispatch = AppStore['dispatch'];
 
 function toggleCellValue(state: AppState, action: ToggleCellValueAction): AppState {
