@@ -50,14 +50,6 @@ export interface ToggleCellValueAction {
 }
 
 /**
- * Sets up the Fluid event subscriptions.
- */
-export interface ConnectToFluidAction {
-	type: ActionName.CONNECT_TO_FLUID;
-	pixelEditorTreeView: TreeView<typeof PixelEditorSchema>;
-}
-
-/**
  * An action that sets the value of a cell on the board. Triggered by a remote change.
  */
 export interface ApplyRemoteTreeChangeAction {
@@ -73,7 +65,7 @@ export interface BroadcastLocalTreeChangeAction {
 /**
  * All actions supported by the root reducer.
  */
-export type ActionTypes = ToggleCellValueAction | ConnectToFluidAction | ApplyRemoteTreeChangeAction | BroadcastLocalTreeChangeAction;
+export type ActionTypes = ToggleCellValueAction | ApplyRemoteTreeChangeAction | BroadcastLocalTreeChangeAction;
 
 /**
  * The root reducer for the application.
@@ -87,8 +79,6 @@ export function appReducer(state: AppState = initialAppState, action: ActionType
 	switch (action.type) {
 		case ActionName.TOGGLE_CELL_VALUE:
 			return toggleCellValue(state, action);
-		case ActionName.CONNECT_TO_FLUID:
-			return connectToFluid(state, action);
 		case ActionName.APPLY_REMOTE_TREE_CHANGE:
 			return applyRemoteTreeChange(state, action);
 		case ActionName.BROADCAST_LOCAL_TREE_CHANGE:
@@ -138,21 +128,8 @@ export const thunkConnectToFluid =
 				});
 			});
 
-			dispatch({
-				type: ActionName.CONNECT_TO_FLUID,
-				pixelEditorTreeView
-			});
-
 			return pixelEditorTreeView;
 		}
-
-function connectToFluid(state: AppState, action: ConnectToFluidAction): AppState {
-	const { pixelEditorTreeView } = action;
-
-	// Preserve other elements of the state object
-	const { pixelEditorTreeView: _, ...other } = state;
-	return { pixelEditorTreeView, ...other };
-}
 
 function broadcastLocalTreeChange(state: AppState, action: BroadcastLocalTreeChangeAction): AppState {
 	if (state.pixelEditorTreeView === undefined) {
