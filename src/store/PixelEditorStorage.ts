@@ -95,3 +95,7 @@ export const setBoardInSharedTree = (pixelEditorTreeView: TreeView<typeof PixelE
 		}
 	}
 }
+
+export const setCell = (pixelEditorTreeView: TreeView<typeof PixelEditorSchema>, x: number, y: number, value: number): void => {
+	pixelEditorTreeView.root.board.set(getKey(x, y), value);
+}

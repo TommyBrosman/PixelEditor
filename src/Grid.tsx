@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './Grid.css';
-import { ActionName, thunkConnectToFluid } from './store/Reducers';
+import { ActionName, thunkConnectToFluid, thunkSetCell } from './store/Reducers';
 import { useAppDispatch, useAppSelector } from './store/Hooks';
 import type { PixelEditorSchema } from './store/PixelEditorStorage';
 import type { TreeView } from 'fluid-framework';
@@ -11,7 +11,7 @@ export function Grid() {
 	const dispatch = useAppDispatch();
 
 	useEffect(() => {
-		dispatch(thunkConnectToFluid(dispatch, () => state))
+		dispatch(thunkConnectToFluid(dispatch))
 			.then(treeView => setPixelEditorTreeView(treeView));
 	});
 
@@ -21,11 +21,12 @@ export function Grid() {
 		const entry = state.itemBoard[y][x];
 
 		const onClickCell = () => {
-			dispatch({
-				type: ActionName.TOGGLE_CELL_VALUE,
+			/*
+			dispatch(thunkSetCell(dispatch, {
 				x,
-				y
-			});
+				y,
+				value: 1 - entry
+			})*/
 		}
 
 		const key = `${x},${y}`;

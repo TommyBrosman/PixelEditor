@@ -1,6 +1,7 @@
 import { Tree, type TreeView } from "fluid-framework";
-import { type PixelEditorSchema, getBoardFromSharedTree, setBoardInSharedTree, start } from "./PixelEditorStorage";
-import { type ThunkAction, configureStore, type ThunkDispatch } from "@reduxjs/toolkit";
+import { type PixelEditorSchema, getBoardFromSharedTree, setBoardInSharedTree, start, setCell } from "./PixelEditorStorage";
+import { type ThunkAction, configureStore, type ThunkDispatch, Tuple } from "@reduxjs/toolkit";
+import { thunk } from "redux-thunk";
 
 const initialItemBoard: number[][] = [
 	[0, 0, 0, 1, 1, 0, 0, 0],
@@ -18,15 +19,13 @@ const initialItemBoard: number[][] = [
  */
 export interface AppState {
 	itemBoard: number[][];
-	pixelEditorTreeView: TreeView<typeof PixelEditorSchema> | undefined;
 };
 
 /**
  * The initial app state. Copied but not modified directly.
  */
 export const initialAppState: AppState = {
-	itemBoard: initialItemBoard,
-	pixelEditorTreeView: undefined
+	itemBoard: initialItemBoard
 };
 
 /**
@@ -81,8 +80,6 @@ export function appReducer(state: AppState = initialAppState, action: ActionType
 			return toggleCellValue(state, action);
 		case ActionName.APPLY_REMOTE_TREE_CHANGE:
 			return applyRemoteTreeChange(state, action);
-		case ActionName.BROADCAST_LOCAL_TREE_CHANGE:
-			return broadcastLocalTreeChange(state, action);
 		default:
 			return state;
 	}
@@ -116,8 +113,7 @@ function toggleCellValue(state: AppState, action: ToggleCellValueAction): AppSta
 }
 
 export const thunkConnectToFluid =
-	(dispatch: ThunkDispatch<AppState, unknown, ActionTypes>, getState: () => AppState):
-		ThunkAction<Promise<TreeView<typeof PixelEditorSchema>>, AppState, unknown, ActionTypes> =>
+	(dispatch: ThunkDispatch<AppState, unknown, ActionTypes>) =>
 		async (dispatch): Promise<TreeView<typeof PixelEditorSchema>> => {
 			const pixelEditorTreeView = await start();
 			Tree.on(pixelEditorTreeView.root, "treeChanged", () => {
@@ -131,14 +127,25 @@ export const thunkConnectToFluid =
 			return pixelEditorTreeView;
 		}
 
-function broadcastLocalTreeChange(state: AppState, action: BroadcastLocalTreeChangeAction): AppState {
-	if (state.pixelEditorTreeView === undefined) {
-		// TODO: Should this throw?
-		return state;
-	}
-	setBoardInSharedTree(state.pixelEditorTreeView, action.board);
-	return state;
+export interface SetCellParams {
+	pixelEditorTreeView: TreeView<typeof PixelEditorSchema>;
+	x: number;
+	y: number;
+	value: number;
 }
+
+export const thunkSetCell =
+	(dispatch: ThunkDispatch<AppState, SetCellParams, ActionTypes>, setCellParams: SetCellParams) =>
+		async (dispatch, getState: () => AppState, setCellParams: SetCellParams): Promise<void> => {
+			const { pixelEditorTreeView, x, y, value } = setCellParams;
+			setCell(pixelEditorTreeView, x, y, value);
+		}
+
+export const thunkBroadcastLocalTreeChange =
+	(dispatch: ThunkDispatch<AppState, unknown, ActionTypes>) =>
+		async (dispatch, getState: () => AppState, pixelEditorTreeView: TreeView<typeof PixelEditorSchema>): Promise<void> => {
+			setBoardInSharedTree(pixelEditorTreeView, getState().itemBoard);
+		}
 
 function applyRemoteTreeChange(state: AppState, action: ApplyRemoteTreeChangeAction): AppState {
 	// Preserve other elements of the state object
