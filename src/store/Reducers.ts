@@ -1,6 +1,6 @@
 import { Tree, type TreeView } from "fluid-framework";
 import { type PixelEditorSchema, getBoardFromSharedTree, setBoardInSharedTree, start } from "./PixelEditorStorage";
-import { type ThunkAction, configureStore } from "@reduxjs/toolkit";
+import { type ThunkAction, configureStore, type ThunkDispatch } from "@reduxjs/toolkit";
 
 const initialItemBoard: number[][] = [
 	[0, 0, 0, 1, 1, 0, 0, 0],
@@ -126,8 +126,9 @@ function toggleCellValue(state: AppState, action: ToggleCellValueAction): AppSta
 }
 
 export const thunkConnectToFluid =
-	(dispatch, getState): ThunkAction<void, AppState, unknown, ActionTypes> =>
-		async dispatch => {
+	(dispatch: ThunkDispatch<AppState, unknown, ActionTypes>, getState: () => AppState):
+		ThunkAction<Promise<TreeView<typeof PixelEditorSchema>>, AppState, unknown, ActionTypes> =>
+		async (dispatch): Promise<TreeView<typeof PixelEditorSchema>> => {
 			const pixelEditorTreeView = await start();
 			Tree.on(pixelEditorTreeView.root, "treeChanged", () => {
 				const currentBoard = getBoardFromSharedTree(pixelEditorTreeView)
@@ -141,8 +142,9 @@ export const thunkConnectToFluid =
 				type: ActionName.CONNECT_TO_FLUID,
 				pixelEditorTreeView
 			});
-		}
 
+			return pixelEditorTreeView;
+		}
 
 function connectToFluid(state: AppState, action: ConnectToFluidAction): AppState {
 	const { pixelEditorTreeView } = action;
