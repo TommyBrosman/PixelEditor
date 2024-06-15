@@ -1,18 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import './Grid.css';
-import { ActionName, thunkConnectToFluid, thunkSetCell } from './store/Reducers';
+import { thunkConnectToFluid, thunkSetCell } from './store/Reducers';
 import { useAppDispatch, useAppSelector } from './store/Hooks';
-import type { PixelEditorSchema } from './store/PixelEditorStorage';
-import type { TreeView } from 'fluid-framework';
 
 export function Grid() {
-	const [_, setPixelEditorTreeView] = useState<TreeView<typeof PixelEditorSchema> | undefined>(undefined);
 	const state = useAppSelector(state => state);
 	const dispatch = useAppDispatch();
 
 	useEffect(() => {
-		dispatch(thunkConnectToFluid(dispatch))
-			.then(treeView => setPixelEditorTreeView(treeView));
+		dispatch(thunkConnectToFluid)();
 	});
 
 	const items = [...Array(64)].map((_, i) => {
@@ -21,12 +17,11 @@ export function Grid() {
 		const entry = state.itemBoard[y][x];
 
 		const onClickCell = () => {
-			/*
-			dispatch(thunkSetCell(dispatch, {
+			dispatch(thunkSetCell)(
 				x,
 				y,
-				value: 1 - entry
-			})*/
+				1 - entry
+			);
 		}
 
 		const key = `${x},${y}`;
