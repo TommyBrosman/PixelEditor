@@ -31,21 +31,9 @@ export const initialAppState: AppState = {
  * All supported action names.
  */
 export enum ActionName {
-	TOGGLE_CELL_VALUE = "TOGGLE_CELL_VALUE",
-	SUBSCRIBE_TO_FLUID_EVENTS = "SUBSCRIBE_TO_FLUID_EVENTS",
 	CONNECT_TO_FLUID = "CONNECT_TO_FLUID",
 	APPLY_REMOTE_TREE_CHANGE = "APPLY_REMOTE_TREE_CHANGE",
-	BROADCAST_LOCAL_TREE_CHANGE = "BROADCAST_LOCAL_TREE_CHANGE"
 };
-
-/**
- * An action that toggles the value of a cell on the board.
- */
-export interface ToggleCellValueAction {
-	type: ActionName.TOGGLE_CELL_VALUE;
-	x: number;
-	y: number;
-}
 
 /**
  * An action that sets the value of a cell on the board. Triggered by a remote change.
@@ -55,15 +43,10 @@ export interface ApplyRemoteTreeChangeAction {
 	board: number[][];
 }
 
-export interface BroadcastLocalTreeChangeAction {
-	type: ActionName.BROADCAST_LOCAL_TREE_CHANGE;
-	board: number[][];
-}
-
 /**
  * All actions supported by the root reducer.
  */
-export type ActionTypes = ToggleCellValueAction | ApplyRemoteTreeChangeAction | BroadcastLocalTreeChangeAction;
+export type ActionTypes = ApplyRemoteTreeChangeAction;
 
 /**
  * The root reducer for the application.
@@ -75,8 +58,6 @@ export type ActionTypes = ToggleCellValueAction | ApplyRemoteTreeChangeAction | 
 // biome-ignore lint/style/useDefaultParameterLast: <explanation>
 export function appReducer(state: AppState = initialAppState, action: ActionTypes): AppState {
 	switch (action.type) {
-		case ActionName.TOGGLE_CELL_VALUE:
-			return toggleCellValue(state, action);
 		case ActionName.APPLY_REMOTE_TREE_CHANGE:
 			return applyRemoteTreeChange(state, action);
 		default:
@@ -106,23 +87,6 @@ export const store = configureStore({
 export type AppStore = typeof store;
 export type RootState = ReturnType<AppStore['getState']>;
 export type AppDispatch = AppStore['dispatch'];
-
-function toggleCellValue(state: AppState, action: ToggleCellValueAction): AppState {
-	const { x, y } = action;
-
-	// Copy all row references. `itemBoard` now points to the rows of the previous version.
-	const newItemBoard = [...state.itemBoard];
-
-	// Clone the target row's elements so that we don't modify the previous version
-	newItemBoard[y] = [...(state.itemBoard[y])];
-
-	// Toggle the cell
-	newItemBoard[y][x] = 1 - state.itemBoard[y][x];
-
-	// Preserve other elements of the state object
-	const { itemBoard, ...other } = state;
-	return { itemBoard: newItemBoard, ...other };
-}
 
 export const thunkConnectToFluid =
 	(dispatch, _getState, sharedTreeConnection: SharedTreeConnection) =>
