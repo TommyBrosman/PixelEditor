@@ -2,6 +2,9 @@ import { configureStore } from "@reduxjs/toolkit";
 import type { SharedTreeConnection } from "./PixelEditorStorage";
 import { appReducer } from "./Reducers";
 
+/**
+ * The root store for the application.
+ */
 export const store = configureStore({
 	reducer: appReducer,
 	middleware: getDefaultMiddleware => {
@@ -13,7 +16,6 @@ export const store = configureStore({
 		});
 	}
 });
-
 
 // Get the type of our store variable as well as the RootState type that matches the store and an AppDispatch type that includes
 // the thunk dispatcher signature.
