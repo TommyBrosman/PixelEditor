@@ -8,6 +8,7 @@ import { type AppState, initialAppState } from "./State";
 export enum ActionName {
 	CONNECT_TO_FLUID = "CONNECT_TO_FLUID",
 	APPLY_REMOTE_TREE_CHANGE = "APPLY_REMOTE_TREE_CHANGE",
+	MARK_IS_CONNECTED = "MARK_IS_CONNECTED"
 };
 
 /**
@@ -18,10 +19,14 @@ export interface ApplyRemoteTreeChangeAction {
 	board: number[][];
 }
 
+export interface MarkIsConnected {
+	type: ActionName.MARK_IS_CONNECTED
+}
+
 /**
  * All actions supported by the root reducer.
  */
-export type ActionTypes = ApplyRemoteTreeChangeAction;
+export type ActionTypes = ApplyRemoteTreeChangeAction | MarkIsConnected;
 
 /**
  * The root reducer for the application.
@@ -35,6 +40,8 @@ export function appReducer(state: AppState = initialAppState, action: ActionType
 	switch (action.type) {
 		case ActionName.APPLY_REMOTE_TREE_CHANGE:
 			return applyRemoteTreeChange(state, action);
+		case ActionName.MARK_IS_CONNECTED:
+			return markIsConnected(state, action);
 		default:
 			return state;
 	}
@@ -57,12 +64,15 @@ export const thunkConnectToFluid =
 			Tree.on(pixelEditorTreeView.root, "treeChanged", () => {
 				const currentBoard = getBoardFromSharedTree(pixelEditorTreeView)
 				dispatch({
-					type : ActionName.APPLY_REMOTE_TREE_CHANGE,
+					type: ActionName.APPLY_REMOTE_TREE_CHANGE,
 					board: currentBoard
 				});
 			});
 
 			sharedTreeConnection.pixelEditorTreeView = pixelEditorTreeView;
+			dispatch({
+				type: ActionName.MARK_IS_CONNECTED
+			})
 		}
 
 /**
@@ -83,10 +93,22 @@ export const thunkSetCell =
  * Reducer. Applies remote tree changes to the in-memory app state.
  * @param state The state to change.
  * @param action The action containing the new board.
- * @returns The updated state
+ * @returns The updated state.
  */
 function applyRemoteTreeChange(state: AppState, action: ApplyRemoteTreeChangeAction): AppState {
 	// Preserve other elements of the state object
 	const { itemBoard, ...other } = state;
 	return { itemBoard: action.board, ...other };
+}
+
+/**
+ * Reducer. Sets the isConnected flag.
+ * @param state The state to change.
+ * @param _action (ignored)
+ * @returns The updated state.
+ */
+function markIsConnected(state: AppState, _action: MarkIsConnected): AppState {
+	// Preserve other elements of the state object
+	const { isLoaded, ...other } = state;
+	return { isLoaded: true, ...other };
 }

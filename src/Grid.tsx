@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import './Grid.css';
 import { thunkConnectToFluid, thunkSetCell } from './store/Reducers';
 import { useAppDispatch, useAppSelector } from './store/Hooks';
@@ -6,12 +6,14 @@ import { initialItemBoard } from './store/State';
 
 export function Grid() {
 	const state = useAppSelector(state => state);
-	const dispatch = useMemo(() => useAppDispatch(), []);
+	const dispatch = useAppDispatch();
 
 	// Only connect once
 	useEffect(() => {
-		dispatch(thunkConnectToFluid)(initialItemBoard);
-	}, [dispatch]);
+		if (!state.isLoaded) {
+			dispatch(thunkConnectToFluid)(initialItemBoard);
+		}
+	}, [state, dispatch]);
 
 	// Populate the board
 	const items = [...Array(64)].map((_, i) => {
