@@ -1,5 +1,5 @@
 import { Tree, type TreeView } from "fluid-framework";
-import { type PixelEditorSchema, getBoardFromSharedTree, start, setCell, setBoardInSharedTree, getKey } from "./PixelEditorStorage";
+import { type PixelEditorSchema, getBoardFromSharedTree, start, setCell, setBoardInSharedTree } from "./PixelEditorStorage";
 import { configureStore } from "@reduxjs/toolkit";
 
 export const initialItemBoard: number[][] = [
@@ -91,7 +91,7 @@ export type AppDispatch = AppStore['dispatch'];
 export const thunkConnectToFluid =
 	(dispatch, _getState, sharedTreeConnection: SharedTreeConnection) =>
 		async (initialBoard: number[][]): Promise<void> => {
-			const pixelEditorTreeView = await start();
+			const pixelEditorTreeView = await start((treeView) => setBoardInSharedTree(treeView, initialBoard));
 			Tree.on(pixelEditorTreeView.root, "treeChanged", () => {
 				const currentBoard = getBoardFromSharedTree(pixelEditorTreeView)
 				dispatch({
@@ -99,12 +99,6 @@ export const thunkConnectToFluid =
 					board: currentBoard
 				});
 			});
-
-			// Check if the persisted board is empty and set it to the initial board
-			const isEmpty = pixelEditorTreeView.root.board.get(getKey(0, 0)) === undefined;
-			if (isEmpty) {
-				setBoardInSharedTree(pixelEditorTreeView, initialBoard);
-			}
 
 			sharedTreeConnection.pixelEditorTreeView = pixelEditorTreeView;
 		}

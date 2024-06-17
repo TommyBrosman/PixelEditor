@@ -42,7 +42,8 @@ const loadExistingPixelEditor = async (id: string): Promise<TreeView<typeof Pixe
  * Join or start a Shared Tree session.
  * @returns The Tree View.
  */
-export const start = async (): Promise<TreeView<typeof PixelEditorSchema>> => {
+export const start = async (populateInitialTree: (treeView: TreeView<typeof PixelEditorSchema>) => void):
+	Promise<TreeView<typeof PixelEditorSchema>> => {
     let pixelEditorTreeView: TreeView<typeof PixelEditorSchema> | undefined;
 	if (location.hash) {
 		pixelEditorTreeView = await loadExistingPixelEditor(location.hash.substring(1));
@@ -50,6 +51,7 @@ export const start = async (): Promise<TreeView<typeof PixelEditorSchema>> => {
 		const result = await createNewPixelEditor();
 		location.hash = result.id;
         pixelEditorTreeView = result.pixelEditorTreeView;
+		populateInitialTree(pixelEditorTreeView);
 	}
 
     return pixelEditorTreeView;
