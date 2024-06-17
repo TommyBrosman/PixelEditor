@@ -88,6 +88,16 @@ export type AppStore = typeof store;
 export type RootState = ReturnType<AppStore['getState']>;
 export type AppDispatch = AppStore['dispatch'];
 
+/**
+ * Thunk. Connects to the Fluid session. Steps:
+ * - Join or create a session
+ * - Write the initial board if creating a new session
+ * - Wire up events that dispatch reducers when the Shared Tree instance changes (either due to local or remote edits)
+ * @param dispatch Redux dispatch method
+ * @param _getState (ignored)
+ * @param sharedTreeConnection Holds the root TreeView.
+ * @returns The inner reducer.
+ */
 export const thunkConnectToFluid =
 	(dispatch, _getState, sharedTreeConnection: SharedTreeConnection) =>
 		async (initialBoard: number[][]): Promise<void> => {
@@ -103,6 +113,13 @@ export const thunkConnectToFluid =
 			sharedTreeConnection.pixelEditorTreeView = pixelEditorTreeView;
 		}
 
+/**
+ * Thunk. Sets a cell on the board to a specific value.
+ * @param _dispatch (ignored)
+ * @param _getState (ignored)
+ * @param sharedTreeConnection Holds the root TreeView.
+ * @returns The inner reducer.
+ */
 export const thunkSetCell =
 	(_dispatch, _getState, sharedTreeConnection: SharedTreeConnection) =>
 		async (x: number, y: number, value: number): Promise<void> => {
@@ -110,6 +127,12 @@ export const thunkSetCell =
 			setCell(sharedTreeConnection.pixelEditorTreeView as TreeView<typeof PixelEditorSchema>, x, y, value);
 		}
 
+/**
+ * Reducer. Applies remote tree changes to the in-memory app state.
+ * @param state The state to change.
+ * @param action The action containing the new board.
+ * @returns The updated state
+ */
 function applyRemoteTreeChange(state: AppState, action: ApplyRemoteTreeChangeAction): AppState {
 	// Preserve other elements of the state object
 	const { itemBoard, ...other } = state;

@@ -98,6 +98,18 @@ export const setBoardInSharedTree = (pixelEditorTreeView: TreeView<typeof PixelE
 	}
 }
 
+/**
+ * Set a cell in the board to a specific value.
+ * @param pixelEditorTreeView The Tree View whose underlying tree is to be modified.
+ * @param x The column.
+ * @param y The row.
+ * @param value The value to set, either 1 or 0.
+ */
 export const setCell = (pixelEditorTreeView: TreeView<typeof PixelEditorSchema>, x: number, y: number, value: number): void => {
 	pixelEditorTreeView.root.board.set(getKey(x, y), value);
+}
+
+// TODO: Rename
+export interface SharedTreeConnection {
+	pixelEditorTreeView: TreeView<typeof PixelEditorSchema> | undefined;
 }
