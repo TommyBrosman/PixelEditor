@@ -1,31 +1,6 @@
 import { Tree, type TreeView } from "fluid-framework";
-import { type PixelEditorSchema, getBoardFromSharedTree, start, setCell, setBoardInSharedTree } from "./PixelEditorStorage";
-import { configureStore } from "@reduxjs/toolkit";
-
-export const initialItemBoard: number[][] = [
-	[0, 0, 0, 1, 1, 0, 0, 0],
-	[0, 0, 1, 0, 0, 1, 0, 0],
-	[0, 0, 1, 0, 0, 1, 0, 0],
-	[0, 1, 0, 0, 0, 0, 1, 0],
-	[1, 0, 0, 0, 0, 0, 0, 1],
-	[0, 0, 0, 1, 1, 0, 0, 0],
-	[0, 0, 1, 0, 0, 1, 0, 0],
-	[0, 0, 1, 0, 0, 1, 0, 0]
-];
-
-/**
- * Holds app state.
- */
-export interface AppState {
-	itemBoard: number[][];
-};
-
-/**
- * The initial app state. Copied but not modified directly.
- */
-export const initialAppState: AppState = {
-	itemBoard: initialItemBoard
-};
+import { type PixelEditorSchema, getBoardFromSharedTree, start, setCell, setBoardInSharedTree, type SharedTreeConnection } from "./PixelEditorStorage";
+import { type AppState, initialAppState } from "./State";
 
 /**
  * All supported action names.
@@ -64,29 +39,6 @@ export function appReducer(state: AppState = initialAppState, action: ActionType
 			return state;
 	}
 }
-
-// TODO: Rename
-interface SharedTreeConnection {
-	pixelEditorTreeView: TreeView<typeof PixelEditorSchema> | undefined;
-}
-
-export const store = configureStore({
-	reducer: appReducer,
-	middleware: getDefaultMiddleware => {
-		const sharedTreeConnection: SharedTreeConnection = { pixelEditorTreeView: undefined };
-		return getDefaultMiddleware({
-		  thunk: {
-			extraArgument: sharedTreeConnection
-		  }
-		});
-	}
-});
-
-// Get the type of our store variable as well as the RootState type that matches the store and an AppDispatch type that includes
-// the thunk dispatcher signature.
-export type AppStore = typeof store;
-export type RootState = ReturnType<AppStore['getState']>;
-export type AppDispatch = AppStore['dispatch'];
 
 /**
  * Thunk. Connects to the Fluid session. Steps:
