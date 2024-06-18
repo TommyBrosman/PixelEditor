@@ -72,7 +72,7 @@ export const thunkConnectToFluid =
 			sharedTreeConnection.pixelEditorTreeView = pixelEditorTreeView;
 			dispatch({
 				type: ActionName.MARK_IS_CONNECTED
-			})
+			});
 		}
 
 /**

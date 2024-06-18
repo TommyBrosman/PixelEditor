@@ -10,9 +10,9 @@ export const store = configureStore({
 	middleware: getDefaultMiddleware => {
 		const sharedTreeConnection: SharedTreeConnection = { pixelEditorTreeView: undefined };
 		return getDefaultMiddleware({
-		  thunk: {
-			extraArgument: sharedTreeConnection
-		  }
+			thunk: {
+				extraArgument: sharedTreeConnection
+			}
 		});
 	}
 });
