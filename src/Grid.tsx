@@ -5,21 +5,22 @@ import { useAppDispatch, useAppSelector } from './store/Hooks';
 import { initialItemBoard } from './store/State';
 
 export function Grid() {
-	const state = useAppSelector(state => state);
+	const isLoaded = useAppSelector(state => state.isLoaded);
+	const itemBoard = useAppSelector(state => state.itemBoard);
 	const dispatch = useAppDispatch();
 
 	// Only connect once
 	useEffect(() => {
-		if (!state.isLoaded) {
+		if (!isLoaded) {
 			dispatch(thunkConnectToFluid)(initialItemBoard);
 		}
-	}, [state, dispatch]);
+	}, [isLoaded, dispatch]);
 
 	// Populate the board
 	const items = [...Array(64)].map((_, i) => {
 		const x = i % 8;
 		const y = Math.floor(i / 8);
-		const entry = state.itemBoard[y][x];
+		const entry = itemBoard[y][x];
 
 		const onClickCell = () => {
 			// Toggle the color between white and black
