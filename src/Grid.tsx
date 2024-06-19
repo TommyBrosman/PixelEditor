@@ -1,29 +1,43 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './Grid.css';
-import { appReducer, ActionName, initialAppState } from './Reducers';
+import { thunkConnectToFluid, thunkSetCell } from './store/Reducers';
+import { useAppDispatch, useAppSelector } from './store/Hooks';
+import { boardHeight, boardWidth } from './store/InitialItemBoard';
 
 export function Grid() {
-	const [state, dispatch] = React.useReducer(appReducer, { ...initialAppState });
+	const isLoaded = useAppSelector(state => state.isLoaded);
+	const itemBoard = useAppSelector(state => state.itemBoard);
+	const dispatch = useAppDispatch();
 
-	const items = [...Array(64)].map((_, i) => {
-		const x = i % 8;
-		const y = Math.floor(i / 8);
-		const entry = state.itemBoard[y][x];
-
-		const onClickCell = () => {
-			dispatch({
-				type: ActionName.TOGGLE_CELL_VALUE,
-				x,
-				y
-			});
+	// Only connect once
+	useEffect(() => {
+		if (!isLoaded) {
+			dispatch(thunkConnectToFluid)();
 		}
+	}, [isLoaded, dispatch]);
 
-		const key = `${x},${y}`;
-		const className = entry === 0 ? 'grid-item-black' : 'grid-item-white';
+	// Populate the board
+	const items = itemBoard.length > 0
+		? [...Array(boardWidth * boardHeight)].map((_, i) => {
+			const x = i % boardWidth;
+			const y = Math.floor(i / boardWidth);
+			const entry = itemBoard[y][x];
 
-		// biome-ignore lint/a11y/useKeyWithClickEvents: Non-useful event.
-		return <div className={className} key={key} onClick={onClickCell} />;
-	});
+			const onClickCell = () => {
+				// Toggle the color between white and black
+				dispatch(thunkSetCell)(
+					x,
+					y,
+					1 - entry
+				);
+			}
+
+			const key = `${x},${y}`;
+			const className = entry === 0 ? 'grid-item-black' : 'grid-item-white';
+
+			// biome-ignore lint/a11y/useKeyWithClickEvents: Non-useful event.
+			return <div className={className} key={key} onClick={onClickCell} />;
+		}) : [];
 
 	return (
 		<div className="grid">
