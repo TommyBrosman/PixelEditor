@@ -1,18 +1,4 @@
 /**
- * The initial board contents.
- */
-export const initialItemBoard: number[][] = [
-	[0, 0, 0, 1, 1, 0, 0, 0],
-	[0, 0, 1, 0, 0, 1, 0, 0],
-	[0, 0, 1, 0, 0, 1, 0, 0],
-	[0, 1, 0, 0, 0, 0, 1, 0],
-	[1, 0, 0, 0, 0, 0, 0, 1],
-	[0, 0, 0, 1, 1, 0, 0, 0],
-	[0, 0, 1, 0, 0, 1, 0, 0],
-	[0, 0, 1, 0, 0, 1, 0, 0]
-];
-
-/**
  * Holds app state.
  */
 export interface AppState {
@@ -25,5 +11,5 @@ export interface AppState {
  */
 export const initialAppState: AppState = {
 	isLoaded: false,
-	itemBoard: initialItemBoard
+	itemBoard: []
 };

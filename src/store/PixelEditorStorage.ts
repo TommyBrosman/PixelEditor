@@ -1,6 +1,7 @@
 /* eslint-disable no-restricted-globals */
 import { SharedTree, TreeConfiguration, SchemaFactory, type TreeView } from "fluid-framework";
 import { TinyliciousClient } from "@fluidframework/tinylicious-client/internal";
+import { boardHeight, boardWidth, initialItemBoard } from "./InitialItemBoard";
 
 const client = new TinyliciousClient();
 const containerSchema = {
@@ -15,13 +16,29 @@ export class PixelEditorSchema extends factory.object("PixelEditor-1.0.0", {
     board: factory.map(factory.number)
 }) {}
 
+/**
+ * Helper for converting to the Map-based board format used in the Shared Tree representation.
+ * @param inputBoard The input board as a nested array.
+ * @returns The output board as a map.
+ */
+const nestedArrayToMap = (inputBoard: number[][]): Map<string, number> => {
+	const outputBoard = new Map<string, number>();
+	for (let y = 0; y < inputBoard.length; y++) {
+		const row = inputBoard[y];
+		for (let x = 0; x < row.length; x++) {
+			const cell = row[x];
+			outputBoard.set(getKey(x, y), cell);
+		}
+	}
+
+	return outputBoard;
+}
+
 const treeConfiguration = new TreeConfiguration(
     PixelEditorSchema,
     () =>
         new PixelEditorSchema({
-            board: new Map([
-                ["0, 0", 1]
-            ]),
+            board: nestedArrayToMap(initialItemBoard),
         }),
 );
 
@@ -42,8 +59,7 @@ const loadExistingPixelEditor = async (id: string): Promise<TreeView<typeof Pixe
  * Join or start a Shared Tree session.
  * @returns The Tree View.
  */
-export const start = async (populateInitialTree: (treeView: TreeView<typeof PixelEditorSchema>) => void):
-	Promise<TreeView<typeof PixelEditorSchema>> => {
+export const start = async (): Promise<TreeView<typeof PixelEditorSchema>> => {
     let pixelEditorTreeView: TreeView<typeof PixelEditorSchema> | undefined;
 	if (location.hash) {
 		pixelEditorTreeView = await loadExistingPixelEditor(location.hash.substring(1));
@@ -51,7 +67,6 @@ export const start = async (populateInitialTree: (treeView: TreeView<typeof Pixe
 		const result = await createNewPixelEditor();
 		location.hash = result.id;
         pixelEditorTreeView = result.pixelEditorTreeView;
-		populateInitialTree(pixelEditorTreeView);
 	}
 
     return pixelEditorTreeView;
@@ -72,9 +87,9 @@ export const getKey = (x: number, y: number) => `${x},${y}`;
  */
 export const getBoardFromSharedTree = (pixelEditorTreeView: TreeView<typeof PixelEditorSchema>): number[][] => {
 	const board: number[][] = new Array();
-	for (let y = 0; y < 8; y++) {
+	for (let y = 0; y < boardHeight; y++) {
 		const row = new Array();
-		for (let x = 0; x < 8; x++) {
+		for (let x = 0; x < boardWidth; x++) {
 			const cell = pixelEditorTreeView.root.board.get(getKey(x, y));
 			row.push(cell);
 		}
@@ -90,8 +105,8 @@ export const getBoardFromSharedTree = (pixelEditorTreeView: TreeView<typeof Pixe
  * @param board The board.
  */
 export const setBoardInSharedTree = (pixelEditorTreeView: TreeView<typeof PixelEditorSchema>, board: number[][]): void => {
-	for (let y = 0; y < 8; y++) {
-		for (let x = 0; x < 8; x++) {
+	for (let y = 0; y < boardHeight; y++) {
+		for (let x = 0; x < boardWidth; x++) {
 			const cell = board[y][x];
 			pixelEditorTreeView.root.board.set(getKey(x, y), cell);
 		}

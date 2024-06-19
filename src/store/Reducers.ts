@@ -1,5 +1,5 @@
 import { Tree, type TreeView } from "fluid-framework";
-import { type PixelEditorSchema, getBoardFromSharedTree, start, setCell, setBoardInSharedTree, type SharedTreeConnection } from "./PixelEditorStorage";
+import { type PixelEditorSchema, getBoardFromSharedTree, start, setCell, type SharedTreeConnection } from "./PixelEditorStorage";
 import { type AppState, initialAppState } from "./State";
 
 /**
@@ -59,8 +59,8 @@ export function appReducer(state: AppState = initialAppState, action: ActionType
  */
 export const thunkConnectToFluid =
 	(dispatch, _getState, sharedTreeConnection: SharedTreeConnection) =>
-		async (initialBoard: number[][]): Promise<void> => {
-			const pixelEditorTreeView = await start((treeView) => setBoardInSharedTree(treeView, initialBoard));
+		async (): Promise<void> => {
+			const pixelEditorTreeView = await start();
 			Tree.on(pixelEditorTreeView.root, "treeChanged", () => {
 				const currentBoard = getBoardFromSharedTree(pixelEditorTreeView)
 				dispatch({
@@ -70,6 +70,15 @@ export const thunkConnectToFluid =
 			});
 
 			sharedTreeConnection.pixelEditorTreeView = pixelEditorTreeView;
+
+			// Dispatch the first change notification. The board was loaded before the event was wired up via Tree, so we need
+			// to dispatch it manually.
+			dispatch({
+				type: ActionName.APPLY_REMOTE_TREE_CHANGE,
+				board: getBoardFromSharedTree(pixelEditorTreeView)
+			});
+
+			// Sets the isLoaded flag.
 			dispatch({
 				type: ActionName.MARK_IS_CONNECTED
 			});
