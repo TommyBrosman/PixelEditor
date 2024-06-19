@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import type { SharedTreeConnection } from "./PixelEditorStorage";
+import type { SharedTreeConnection } from "./Storage";
 import { appReducer } from "./Reducers";
 
 /**

@@ -1,9 +1,9 @@
 import { Tree, type TreeView } from "fluid-framework";
-import { type PixelEditorSchema, getBoardFromSharedTree, start, setCell, type SharedTreeConnection } from "./PixelEditorStorage";
+import { type PixelEditorSchema, getBoardFromSharedTree, start, setCell, type SharedTreeConnection } from "./Storage";
 import { type AppState, initialAppState } from "./State";
 
 /**
- * All supported action names.
+ * All supported action names.W
  */
 export enum ActionName {
 	CONNECT_TO_FLUID = "CONNECT_TO_FLUID",
