@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import type { SharedTreeConnection } from "./Storage";
+import type { SharedTreeConnection } from "./Model";
 import { appReducer } from "./Reducers";
 
 /**

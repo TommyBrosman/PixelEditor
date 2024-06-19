@@ -1,5 +1,5 @@
 import { Tree, type TreeView } from "fluid-framework";
-import { type PixelEditorSchema, getBoardFromSharedTree, start, setCell, type SharedTreeConnection } from "./Storage";
+import { type PixelEditorSchema, getBoardFromSharedTree, start, setCell, type SharedTreeConnection } from "./Model";
 import { type AppState, initialAppState } from "./State";
 
 /**
@@ -50,7 +50,6 @@ export function appReducer(state: AppState = initialAppState, action: ActionType
 /**
  * Thunk. Connects to the Fluid session. Steps:
  * - Join or create a session
- * - Write the initial board if creating a new session
  * - Wire up events that dispatch reducers when the Shared Tree instance changes (either due to local or remote edits)
  * @param dispatch Redux dispatch method
  * @param _getState (ignored)
