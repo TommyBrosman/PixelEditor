@@ -12,8 +12,52 @@ const factory: SchemaFactory = new SchemaFactory("PixelEditorSample");
 
 // Defines the root schema.
 export class PixelEditorSchema extends factory.object("PixelEditor-1.0.0", {
-    board: factory.map(factory.number)
-}) {}
+    board: factory.map(factory.number),
+}) {
+	/**
+	 * Get the current board from Shared Tree.
+	 * @param pixelEditorTreeView The Tree View to read from.
+	 * @returns The board.
+	 */
+	public getBoardAsNestedArray(): number[][] {
+		const outputBoard: number[][] = new Array();
+		for (let y = 0; y < boardHeight; y++) {
+			const row = new Array();
+			for (let x = 0; x < boardWidth; x++) {
+				const cell = this.board.get(getKey(x, y));
+				row.push(cell);
+			}
+			outputBoard.push(row);
+		}
+
+		return outputBoard;
+	};
+
+	/**
+	 * Set the copy of the board in Shared Tree.
+	 * @param pixelEditorTreeView The Tree View whose underlying tree is to be modified.
+	 * @param board The board.
+	 */
+	public setBoardFromNestedArray(inputBoard: number[][]): void {
+		for (let y = 0; y < boardHeight; y++) {
+			for (let x = 0; x < boardWidth; x++) {
+				const cell = inputBoard[y][x];
+				this.board.set(getKey(x, y), cell);
+			}
+		}
+	}
+
+	/**
+	 * Set a cell in the board to a specific value.
+	 * @param pixelEditorTreeView The Tree View whose underlying tree is to be modified.
+	 * @param x The column.
+	 * @param y The row.
+	 * @param value The value to set, either 1 or 0.
+	 */
+	public setCell(x: number, y: number, value: number): void {
+		this.board.set(getKey(x, y), value);
+	}
+}
 
 /**
  * Helper for converting to the Map-based board format used in the Shared Tree representation.
@@ -78,50 +122,6 @@ export const start = async (): Promise<TreeView<typeof PixelEditorSchema>> => {
  * @returns The cell value.
  */
 export const getKey = (x: number, y: number) => `${x},${y}`;
-
-/**
- * Get the current board from Shared Tree.
- * @param pixelEditorTreeView The Tree View to read from.
- * @returns The board.
- */
-export const getBoardFromSharedTree = (pixelEditorTreeView: TreeView<typeof PixelEditorSchema>): number[][] => {
-	const board: number[][] = new Array();
-	for (let y = 0; y < boardHeight; y++) {
-		const row = new Array();
-		for (let x = 0; x < boardWidth; x++) {
-			const cell = pixelEditorTreeView.root.board.get(getKey(x, y));
-			row.push(cell);
-		}
-		board.push(row);
-	}
-
-	return board;
-}
-
-/**
- * Set the copy of the board in Shared Tree.
- * @param pixelEditorTreeView The Tree View whose underlying tree is to be modified.
- * @param board The board.
- */
-export const setBoardInSharedTree = (pixelEditorTreeView: TreeView<typeof PixelEditorSchema>, board: number[][]): void => {
-	for (let y = 0; y < boardHeight; y++) {
-		for (let x = 0; x < boardWidth; x++) {
-			const cell = board[y][x];
-			pixelEditorTreeView.root.board.set(getKey(x, y), cell);
-		}
-	}
-}
-
-/**
- * Set a cell in the board to a specific value.
- * @param pixelEditorTreeView The Tree View whose underlying tree is to be modified.
- * @param x The column.
- * @param y The row.
- * @param value The value to set, either 1 or 0.
- */
-export const setCell = (pixelEditorTreeView: TreeView<typeof PixelEditorSchema>, x: number, y: number, value: number): void => {
-	pixelEditorTreeView.root.board.set(getKey(x, y), value);
-}
 
 // TODO: Rename
 /**

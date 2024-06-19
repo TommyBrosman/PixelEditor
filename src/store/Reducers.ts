@@ -1,5 +1,5 @@
-import { Tree, type TreeView } from "fluid-framework";
-import { type PixelEditorSchema, getBoardFromSharedTree, start, setCell, type SharedTreeConnection } from "./Model";
+import { Tree } from "fluid-framework";
+import { start, type SharedTreeConnection } from "./Model";
 import { type AppState, initialAppState } from "./State";
 
 /**
@@ -61,7 +61,7 @@ export const thunkConnectToFluid =
 		async (): Promise<void> => {
 			const pixelEditorTreeView = await start();
 			Tree.on(pixelEditorTreeView.root, "treeChanged", () => {
-				const currentBoard = getBoardFromSharedTree(pixelEditorTreeView)
+				const currentBoard = pixelEditorTreeView.root.getBoardAsNestedArray();
 				dispatch({
 					type: ActionName.APPLY_REMOTE_TREE_CHANGE,
 					board: currentBoard
@@ -74,7 +74,7 @@ export const thunkConnectToFluid =
 			// to dispatch it manually.
 			dispatch({
 				type: ActionName.APPLY_REMOTE_TREE_CHANGE,
-				board: getBoardFromSharedTree(pixelEditorTreeView)
+				board: pixelEditorTreeView.root.getBoardAsNestedArray()
 			});
 
 			// Sets the isLoaded flag.
@@ -93,8 +93,8 @@ export const thunkConnectToFluid =
 export const thunkSetCell =
 	(_dispatch, _getState, sharedTreeConnection: SharedTreeConnection) =>
 		async (x: number, y: number, value: number): Promise<void> => {
-			// TODO: Change so that this no longer needs to be cast
-			setCell(sharedTreeConnection.pixelEditorTreeView as TreeView<typeof PixelEditorSchema>, x, y, value);
+			// Can fail if thunkSetCell runs before the tree is loaded
+			sharedTreeConnection.pixelEditorTreeView?.root.setCell(x, y, value);
 		}
 
 /**
