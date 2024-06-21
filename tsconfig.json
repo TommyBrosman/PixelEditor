@@ -16,7 +16,7 @@
 		"sourceMap": true,
 		"strict": true,
 		"target": "ES2020",
-		"types": [],
+		"types": ["@types/mocha"],
 		"module": "Node16",
 		"moduleResolution": "Node16",
 	},

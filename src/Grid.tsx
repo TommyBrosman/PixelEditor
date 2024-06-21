@@ -3,6 +3,7 @@ import './Grid.css';
 import { thunkConnectToFluid, thunkSetCell } from './store/Reducers';
 import { useAppDispatch, useAppSelector } from './store/Hooks';
 import { boardHeight, boardWidth } from './store/InitialItemBoard';
+import { Cell } from './Cell';
 
 export function Grid() {
 	const isLoaded = useAppSelector(state => state.isLoaded);
@@ -21,22 +22,19 @@ export function Grid() {
 		? [...Array(boardWidth * boardHeight)].map((_, i) => {
 			const x = i % boardWidth;
 			const y = Math.floor(i / boardWidth);
-			const entry = itemBoard[y][x];
+			const value = itemBoard[y][x];
 
 			const onClickCell = () => {
 				// Toggle the color between white and black
 				dispatch(thunkSetCell)(
 					x,
 					y,
-					1 - entry
+					1 - value
 				);
 			}
 
 			const key = `${x},${y}`;
-			const className = entry === 0 ? 'grid-item-black' : 'grid-item-white';
-
-			// biome-ignore lint/a11y/useKeyWithClickEvents: Non-useful event.
-			return <div className={className} key={key} onClick={onClickCell} />;
+			return <Cell key={key} onClickCell={onClickCell} value={value}/>
 		}) : [];
 
 	return (
@@ -45,3 +43,5 @@ export function Grid() {
 		</div>
 	);
 }
+
+export default Grid;

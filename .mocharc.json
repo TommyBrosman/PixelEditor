@@ -1,0 +1,9 @@
+{
+    "loader": "ts-node/esm",
+    "require": [
+        "mocha.cjs"
+    ],
+	"spec": "./src/**/*.test.[jt]s?(x)",
+    "ignore": "./node_modules/**",
+    "timeout": 20000
+}
