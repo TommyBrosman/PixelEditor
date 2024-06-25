@@ -6,8 +6,8 @@ import { Cell } from './Cell';
 import { connectToFluid, setCell } from './store/Reducers';
 
 export function Grid() {
-	const isLoaded = useAppSelector(state => state.isLoaded);
-	const itemBoard = useAppSelector(state => state.itemBoard);
+	const isLoaded = useAppSelector(state => state.app.isLoaded);
+	const itemBoard = useAppSelector(state => state.app.itemBoard);
 	const dispatch = useAppDispatch();
 
 	// Only connect once

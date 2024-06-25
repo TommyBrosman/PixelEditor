@@ -1,12 +1,12 @@
 import React from 'react';
 import './App.css';
 import Grid from './Grid';
-import { store } from './store/Store';
+import { setupStore } from './store/Store';
 import { Provider } from 'react-redux';
 
 function App() {
 	return (
-		<Provider store={store}>
+		<Provider store={setupStore()}>
 			<div className="App">
 				<header className="App-header">
 					<Grid />

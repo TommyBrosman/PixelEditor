@@ -7,12 +7,13 @@ import { render } from "@testing-library/react";
 import Grid from "./Grid";
 import { boardHeight, boardWidth } from "./store/InitialItemBoard";
 import { Provider } from "react-redux";
-import { store } from "./store/Store";
+import { setupStore } from "./store/Store";
+import { initialAppState } from "./store/State";
 
 describe("Tests for Grid", () => {
 	it("Displays expected text and contains expected link", async (): Promise<void> => {
 		const { container } = render(
-			<Provider store={store}>
+			<Provider store={setupStore({ app: initialAppState })}>
 				<Grid/>
 			</Provider>);
 		const cells = Array.from(await container.querySelectorAll('.grid-item-black,.grid-item.white'));
