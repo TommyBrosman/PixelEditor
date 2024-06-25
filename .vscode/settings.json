@@ -1,7 +1,7 @@
 {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"editor.insertSpaces": false,
-    "files.insertFinalNewline": true,
+	"files.insertFinalNewline": true,
 	"files.trimFinalNewlines": true,
 	"files.trimTrailingWhitespace": true,
 	"cSpell.words": [
