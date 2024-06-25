@@ -1,122 +1,73 @@
 import { Tree } from "fluid-framework";
+import { asyncThunkCreator, buildCreateSlice, type PayloadAction } from '@reduxjs/toolkit'
 import { start, type SharedTreeConnection } from "./Model";
 import { type AppState, initialAppState } from "./State";
 
-/**
- * All supported action names.W
- */
-export enum ActionName {
-	CONNECT_TO_FLUID = "CONNECT_TO_FLUID",
-	APPLY_REMOTE_TREE_CHANGE = "APPLY_REMOTE_TREE_CHANGE",
-	MARK_IS_CONNECTED = "MARK_IS_CONNECTED"
-};
+// Use the version of createSlice that supports async thunks
+const createAppSlice = buildCreateSlice({
+	creators: { asyncThunk: asyncThunkCreator },
+});
 
 /**
- * An action that sets the value of a cell on the board. Triggered by a remote change.
+ * The root reducers for application state.
  */
-export interface ApplyRemoteTreeChangeAction {
-	type: ActionName.APPLY_REMOTE_TREE_CHANGE;
-	board: number[][];
-}
+const appSlice = createAppSlice({
+	name: "app",
+	initialState: initialAppState,
+	reducers: (create) => ({
 
-export interface MarkIsConnected {
-	type: ActionName.MARK_IS_CONNECTED
-}
+		// Applies remote tree changes to the in-memory app state
+		applyRemoteTreeChange: create.reducer((state: AppState, action: PayloadAction<number[][]>): AppState => {
+			// Preserve other elements of the state object
+			const { itemBoard, ...other } = state;
+			return { itemBoard: action.payload, ...other };
+		}),
 
-/**
- * All actions supported by the root reducer.
- */
-export type ActionTypes = ApplyRemoteTreeChangeAction | MarkIsConnected;
+		// Sets the isConnected flag
+		markIsConnected: create.reducer((state: AppState): AppState => {
+			// Preserve other elements of the state object
+			const { isLoaded, ...other } = state;
+			return { isLoaded: true, ...other };
+		}),
 
-/**
- * The root reducer for the application.
- * @param state The current state.
- * @param action The action being applied to the state.
- * @returns The new state.
- */
+		/**
+		 * Thunk. Sets a cell on the board to a specific value.
+		 */
+		setCell: create.asyncThunk<void, {x: number, y: number, value: number}, { extra: SharedTreeConnection }>(
+			async (thunkArg: {x: number, y: number, value: number}, thunkAPI): Promise<void> => {
+				const { x, y, value } = thunkArg;
+				thunkAPI.extra
 
-// biome-ignore lint/style/useDefaultParameterLast: <explanation>
-export function appReducer(state: AppState = initialAppState, action: ActionTypes): AppState {
-	switch (action.type) {
-		case ActionName.APPLY_REMOTE_TREE_CHANGE:
-			return applyRemoteTreeChange(state, action);
-		case ActionName.MARK_IS_CONNECTED:
-			return markIsConnected(state, action);
-		default:
-			return state;
-	}
-}
+				// Can fail if thunkSetCell runs before the tree is loaded
+				const sharedTreeConnection = thunkAPI.extra;
+				sharedTreeConnection.pixelEditorTreeView?.root.setCell(x, y, value);
+			}),
 
-/**
- * Thunk. Connects to the Fluid session. Steps:
- * - Join or create a session
- * - Wire up events that dispatch reducers when the Shared Tree instance changes (either due to local or remote edits)
- * @param dispatch Redux dispatch method
- * @param _getState (ignored)
- * @param sharedTreeConnection Holds the root TreeView.
- * @returns The inner reducer.
- */
-export const thunkConnectToFluid =
-	(dispatch, _getState, sharedTreeConnection: SharedTreeConnection) =>
-		async (): Promise<void> => {
-			const pixelEditorTreeView = await start();
-			Tree.on(pixelEditorTreeView.root, "treeChanged", () => {
-				const currentBoard = pixelEditorTreeView.root.getBoardAsNestedArray();
-				dispatch({
-					type: ActionName.APPLY_REMOTE_TREE_CHANGE,
-					board: currentBoard
+		/**
+		 * Thunk. Connects to the Fluid session. Steps:
+		 * - Join or create a session
+		 * - Wire up events that dispatch reducers when the Shared Tree instance changes (either due to local or remote edits)
+		 */
+		connectToFluid: create.asyncThunk<void, void,  { extra: SharedTreeConnection }>(
+			async (_, { dispatch, extra }) => {
+				const pixelEditorTreeView = await start();
+				Tree.on(pixelEditorTreeView.root, "treeChanged", () => {
+					const currentBoard = pixelEditorTreeView.root.getBoardAsNestedArray();
+					dispatch(applyRemoteTreeChange(currentBoard));
 				});
-			});
 
-			sharedTreeConnection.pixelEditorTreeView = pixelEditorTreeView;
+				const sharedTreeConnection = extra;
+				sharedTreeConnection.pixelEditorTreeView = pixelEditorTreeView;
 
-			// Dispatch the first change notification. The board was loaded before the event was wired up via Tree, so we need
-			// to dispatch it manually.
-			dispatch({
-				type: ActionName.APPLY_REMOTE_TREE_CHANGE,
-				board: pixelEditorTreeView.root.getBoardAsNestedArray()
-			});
+				// Dispatch the first change notification. The board was loaded before the event was wired up via Tree, so we need
+				// to dispatch it manually.
+				dispatch(applyRemoteTreeChange(pixelEditorTreeView.root.getBoardAsNestedArray()));
 
-			// Sets the isLoaded flag.
-			dispatch({
-				type: ActionName.MARK_IS_CONNECTED
-			});
-		}
+				// Sets the isLoaded flag.
+				dispatch(markIsConnected());
+			})
+	})
+})
 
-/**
- * Thunk. Sets a cell on the board to a specific value.
- * @param _dispatch (ignored)
- * @param _getState (ignored)
- * @param sharedTreeConnection Holds the root TreeView.
- * @returns The inner reducer.
- */
-export const thunkSetCell =
-	(_dispatch, _getState, sharedTreeConnection: SharedTreeConnection) =>
-		async (x: number, y: number, value: number): Promise<void> => {
-			// Can fail if thunkSetCell runs before the tree is loaded
-			sharedTreeConnection.pixelEditorTreeView?.root.setCell(x, y, value);
-		}
-
-/**
- * Reducer. Applies remote tree changes to the in-memory app state.
- * @param state The state to change.
- * @param action The action containing the new board.
- * @returns The updated state.
- */
-function applyRemoteTreeChange(state: AppState, action: ApplyRemoteTreeChangeAction): AppState {
-	// Preserve other elements of the state object
-	const { itemBoard, ...other } = state;
-	return { itemBoard: action.board, ...other };
-}
-
-/**
- * Reducer. Sets the isConnected flag.
- * @param state The state to change.
- * @param _action (ignored)
- * @returns The updated state.
- */
-function markIsConnected(state: AppState, _action: MarkIsConnected): AppState {
-	// Preserve other elements of the state object
-	const { isLoaded, ...other } = state;
-	return { isLoaded: true, ...other };
-}
+export const appReducer = appSlice.reducer;
+export const { applyRemoteTreeChange, markIsConnected, setCell, connectToFluid } = appSlice.actions;

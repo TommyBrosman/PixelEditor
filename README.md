@@ -77,10 +77,10 @@ The `sharedTreeConnection` object is injected by the thunk middleware at dispatc
 ```ts
 const onClickCell = () => {
     // Toggle the color between white and black
-    dispatch(thunkSetCell)(
+    dispatch(setCell({
         x,
         y,
-        1 - entry
-    );
+        value: 1 - entry
+    }));
 }
 ```
