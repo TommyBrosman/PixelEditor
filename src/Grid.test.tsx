@@ -16,7 +16,7 @@ describe("Tests for Grid", () => {
 			<Provider store={store}>
 				<Grid/>
 			</Provider>);
-		const cells = Array.from(await container.querySelectorAll('.grid-item-black,.grid-item.white'));
+		const cells = Array.from(await container.querySelectorAll('.grid-item-black,.grid-item-white'));
 		expect(cells).length(boardWidth * boardHeight);
 	});
 });
