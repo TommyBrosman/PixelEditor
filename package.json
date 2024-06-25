@@ -9,10 +9,6 @@
 		"@fluidframework/tinylicious-client": "2.0.0-rc.4.0.4",
 		"@fluidframework/tree": "2.0.0-rc.4.0.4",
 		"@reduxjs/toolkit": "^2.2.5",
-		"@testing-library/jest-dom": "^5.17.0",
-		"@testing-library/react": "^13.4.0",
-		"@testing-library/user-event": "^13.5.0",
-		"@types/jest": "^27.5.2",
 		"@types/node": "^16.18.97",
 		"@types/react": "^18.3.3",
 		"@types/react-dom": "^18.3.0",
@@ -28,10 +24,11 @@
 	"scripts": {
 		"build": "webpack --env prod",
 		"build:dev": "webpack",
-		"test": "react-scripts test",
 		"start": "start-server-and-test start:server 7070 start:client",
 		"start:client": "webpack serve",
-		"start:server": "tinylicious"
+		"start:server": "tinylicious",
+		"test": "start-server-and-test start:server 7070 test:mocha",
+		"test:mocha": "mocha --require global-jsdom/register"
 	},
 	"eslintConfig": {
 		"extends": [
@@ -54,12 +51,23 @@
 	"devDependencies": {
 		"@babel/plugin-proposal-private-property-in-object": "^7.21.11",
 		"@biomejs/biome": "1.8.0",
+		"@testing-library/react": "^16.0.0",
+		"@testing-library/user-event": "^14.5.2",
+		"@types/chai": "^4.3.16",
+		"@types/mocha": "^10.0.6",
+		"chai": "^5.1.1",
+		"cross-env": "^7.0.3",
 		"css-loader": "^5",
+		"global-jsdom": "^24.0.0",
 		"html-webpack-plugin": "^5.5.3",
+		"ignore-styles": "^5.0.1",
+		"jsdom": "^24.1.0",
+		"mocha": "^10.4.0",
 		"start-server-and-test": "^2.0.0",
 		"style-loader": "^2",
 		"tinylicious": "^4.0.1",
 		"ts-loader": "^8.0.0",
+		"ts-node": "^10.9.2",
 		"webpack": "^5.88.2",
 		"webpack-cli": "^5.1.4",
 		"webpack-dev-server": "^4.15.1"
