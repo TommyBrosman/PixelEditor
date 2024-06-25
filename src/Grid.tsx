@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import './Grid.css';
-import { thunkConnectToFluid, thunkSetCell } from './store/Reducers';
 import { useAppDispatch, useAppSelector } from './store/Hooks';
 import { boardHeight, boardWidth } from './store/InitialItemBoard';
+import { connectToFluid, setCell } from './store/Reducers';
 
 export function Grid() {
 	const isLoaded = useAppSelector(state => state.isLoaded);
@@ -12,7 +12,7 @@ export function Grid() {
 	// Only connect once
 	useEffect(() => {
 		if (!isLoaded) {
-			dispatch(thunkConnectToFluid)();
+			dispatch(connectToFluid());
 		}
 	}, [isLoaded, dispatch]);
 
@@ -25,11 +25,11 @@ export function Grid() {
 
 			const onClickCell = () => {
 				// Toggle the color between white and black
-				dispatch(thunkSetCell)(
+				dispatch(setCell({
 					x,
 					y,
-					1 - entry
-				);
+					value: 1 - entry
+				}));
 			}
 
 			const key = `${x},${y}`;

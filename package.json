@@ -54,6 +54,7 @@
 	"devDependencies": {
 		"@babel/plugin-proposal-private-property-in-object": "^7.21.11",
 		"@biomejs/biome": "1.8.0",
+		"@types/mocha": "^10.0.7",
 		"css-loader": "^5",
 		"html-webpack-plugin": "^5.5.3",
 		"start-server-and-test": "^2.0.0",
