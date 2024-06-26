@@ -2,11 +2,12 @@ import React, { useEffect } from 'react';
 import './Grid.css';
 import { useAppDispatch, useAppSelector } from './store/Hooks';
 import { boardHeight, boardWidth } from './store/InitialItemBoard';
+import { Cell } from './Cell';
 import { connectToFluid, setCell } from './store/Reducers';
 
 export function Grid() {
-	const isLoaded = useAppSelector(state => state.isLoaded);
-	const itemBoard = useAppSelector(state => state.itemBoard);
+	const isLoaded = useAppSelector(state => state.app.isLoaded);
+	const itemBoard = useAppSelector(state => state.app.itemBoard);
 	const dispatch = useAppDispatch();
 
 	// Only connect once
@@ -21,22 +22,19 @@ export function Grid() {
 		? [...Array(boardWidth * boardHeight)].map((_, i) => {
 			const x = i % boardWidth;
 			const y = Math.floor(i / boardWidth);
-			const entry = itemBoard[y][x];
+			const value = itemBoard[y][x];
 
 			const onClickCell = () => {
 				// Toggle the color between white and black
 				dispatch(setCell({
 					x,
 					y,
-					value: 1 - entry
+					value: 1 - value
 				}));
 			}
 
 			const key = `${x},${y}`;
-			const className = entry === 0 ? 'grid-item-black' : 'grid-item-white';
-
-			// biome-ignore lint/a11y/useKeyWithClickEvents: Non-useful event.
-			return <div className={className} key={key} onClick={onClickCell} />;
+			return <Cell key={key} onClickCell={onClickCell} value={value}/>
 		}) : [];
 
 	return (
@@ -45,3 +43,5 @@ export function Grid() {
 		</div>
 	);
 }
+
+export default Grid;

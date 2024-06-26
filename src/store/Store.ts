@@ -1,24 +1,29 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import type { SharedTreeConnection } from "./Model";
 import { appReducer } from "./Reducers";
 
+const rootReducer = combineReducers({ app: appReducer });
+
 /**
- * The root store for the application.
+ * Set up root store for the application.
  */
-export const store = configureStore({
-	reducer: appReducer,
-	middleware: getDefaultMiddleware => {
-		const sharedTreeConnection: SharedTreeConnection = { pixelEditorTreeView: undefined };
-		return getDefaultMiddleware({
-			thunk: {
-				extraArgument: sharedTreeConnection
-			}
-		});
-	}
-});
+export function setupStore(preloadedState?: Partial<RootState>) {
+	return configureStore({
+		reducer: rootReducer,
+		middleware: getDefaultMiddleware => {
+			const sharedTreeConnection: SharedTreeConnection = { pixelEditorTreeView: undefined };
+			return getDefaultMiddleware({
+				thunk: {
+					extraArgument: sharedTreeConnection
+				}
+			});
+		},
+		preloadedState
+	})
+}
 
 // Get the type of our store variable as well as the RootState type that matches the store and an AppDispatch type that includes
 // the thunk dispatcher signature.
-export type AppStore = typeof store;
-export type RootState = ReturnType<AppStore['getState']>;
+export type RootState = ReturnType<typeof rootReducer>
+export type AppStore = ReturnType<typeof setupStore>;
 export type AppDispatch = AppStore['dispatch'];
