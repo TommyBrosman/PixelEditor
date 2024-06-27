@@ -36,7 +36,6 @@ const appSlice = createAppSlice({
 		setCell: create.asyncThunk<void, {x: number, y: number, value: number}, { extra: SharedTreeConnection }>(
 			async (thunkArg: {x: number, y: number, value: number}, thunkAPI): Promise<void> => {
 				const { x, y, value } = thunkArg;
-				thunkAPI.extra
 
 				// Can fail if thunkSetCell runs before the tree is loaded
 				const sharedTreeConnection = thunkAPI.extra;
@@ -48,7 +47,7 @@ const appSlice = createAppSlice({
 		 * - Join or create a session
 		 * - Wire up events that dispatch reducers when the Shared Tree instance changes (either due to local or remote edits)
 		 */
-		connectToFluid: create.asyncThunk<void, void,  { extra: SharedTreeConnection }>(
+		connectToFluid: create.asyncThunk<void, void, { extra: SharedTreeConnection }>(
 			async (_, { dispatch, extra }) => {
 				const pixelEditorTreeView = await start();
 				Tree.on(pixelEditorTreeView.root, "treeChanged", () => {

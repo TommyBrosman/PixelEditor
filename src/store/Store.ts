@@ -24,6 +24,6 @@ export function setupStore(preloadedState?: Partial<RootState>) {
 
 // Get the type of our store variable as well as the RootState type that matches the store and an AppDispatch type that includes
 // the thunk dispatcher signature.
-export type RootState = ReturnType<typeof rootReducer>
+export type RootState = ReturnType<typeof rootReducer>;
 export type AppStore = ReturnType<typeof setupStore>;
 export type AppDispatch = AppStore['dispatch'];
