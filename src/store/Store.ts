@@ -7,14 +7,14 @@ const rootReducer = combineReducers({ app: appReducer });
 /**
  * Set up root store for the application.
  */
-export function setupStore(preloadedState?: Partial<RootState>) {
+export function setupStore(preloadedState?: Partial<RootState>, sharedTreeConnection?: SharedTreeConnection) {
 	return configureStore({
 		reducer: rootReducer,
 		middleware: getDefaultMiddleware => {
-			const sharedTreeConnection: SharedTreeConnection = { pixelEditorTreeView: undefined };
+			const effectiveSharedTreeConnection = sharedTreeConnection ?? { pixelEditorTreeView: undefined };
 			return getDefaultMiddleware({
 				thunk: {
-					extraArgument: sharedTreeConnection
+					extraArgument: effectiveSharedTreeConnection
 				}
 			});
 		},
