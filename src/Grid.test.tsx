@@ -1,5 +1,5 @@
 import React from "react";
-import { expect } from "chai";
+import { assert, expect } from "chai";
 
 // eslint-disable-next-line import/no-unassigned-import
 import "@testing-library/dom"
@@ -8,46 +8,90 @@ import Grid from "./Grid";
 import { boardHeight, boardWidth, initialItemBoard } from "./store/InitialItemBoard";
 import { Provider } from "react-redux";
 import { setupStore } from "./store/Store";
-import { useRootSelector } from "./store/Hooks";
-import { emptyItemBoard } from "./GridTestHelper";
+import type { PixelEditorSchema, SharedTreeConnection } from "./store/Model";
+import type { TreeView } from "fluid-framework";
+import { initialAppState } from "./store/State";
 
-describe("Tests for Grid", () => {
-	it("Can load a board", async (): Promise<void> => {
-		const store = setupStore({ app: { isLoaded: true, itemBoard: initialItemBoard } });
-		render(
-			<Provider store={store}>
-				<Grid/>
-			</Provider>);
-
-		waitFor(() => {
-			const isLoaded = useRootSelector((state) => state.app.isLoaded);
-			expect(isLoaded).equals(true);
-		});
+/**
+ * Wait for the thunk that connects to Fluid.
+ * @param sharedTreeConnection The connection injected into the store.
+ * @returns The promise to wait on.
+ */
+const waitForFluidConnection = async (sharedTreeConnection: SharedTreeConnection) =>
+	waitFor(() => {
+		expect(sharedTreeConnection.pixelEditorTreeView, "Ensure that tinylicious is running.").to.not.be.undefined;
 	});
 
+// TODO: Enum for kind
+const countCellsInModel = (sharedTreeConnection: SharedTreeConnection, kind: number) => {
+	assert(sharedTreeConnection.pixelEditorTreeView !== undefined, "Must be connected to Fluid.");
+	const treeView = sharedTreeConnection.pixelEditorTreeView as TreeView<typeof PixelEditorSchema>;
+	const cellValues = Array.from(treeView.root.board.values());
+	return cellValues.reduce((total, current) => total + (current === kind ? 1 : 0));
+}
+
+describe("Tests for Grid", () => {
+	/**
+	 * Visual test for the Grid component. Ignores Fluid and tells the app that the board is already loaded.
+	 */
 	it("Displays an 8x8 board", async (): Promise<void> => {
 		const store = setupStore({ app: { isLoaded: true, itemBoard: initialItemBoard } });
 		const { container } = render(
 			<Provider store={store}>
 				<Grid/>
 			</Provider>);
+
 		const cells = Array.from(container.querySelectorAll('.grid-item-black,.grid-item-white'));
 		expect(cells).length(boardWidth * boardHeight);
 	});
 
+	/**
+	 * Toggles a cell via the UI, then ensures that the visual state is consistent.
+	 */
 	it("Toggles a cell", async (): Promise<void> => {
-		const store = setupStore({ app: { isLoaded: true, itemBoard: emptyItemBoard } });
+		const sharedTreeConnection: SharedTreeConnection = { pixelEditorTreeView: undefined };
+		const store = setupStore(
+			{ app: initialAppState },
+			sharedTreeConnection);
 		const { container } = render(
 			<Provider store={store}>
 				<Grid/>
 			</Provider>);
+		await waitForFluidConnection(sharedTreeConnection);
+
 		const blackCellsBefore = Array.from(container.querySelectorAll('.grid-item-black'));
 		const whiteCellsBefore = Array.from(container.querySelectorAll('.grid-item-white'));
+
 		fireEvent.click(blackCellsBefore[0]);
 
-		waitFor(() => {
+		await waitFor(() => {
 			const whiteCellsAfter = Array.from(container.querySelectorAll('.grid-item-white'));
-			expect(whiteCellsBefore).length(whiteCellsAfter.length + 1);
+			expect(whiteCellsAfter).length(whiteCellsBefore.length + 1);
+		});
+	});
+
+	/**
+	 * Toggles a cell and asserts that the backing tree has changed.
+	 */
+	it("Toggling a cell in the UI sets the corresponding cell in the backing Fluid Tree DDS", async (): Promise<void> => {
+		const sharedTreeConnection: SharedTreeConnection = { pixelEditorTreeView: undefined };
+		const store = setupStore(
+			{ app: initialAppState },
+			sharedTreeConnection);
+		const { container } = render(
+			<Provider store={store}>
+				<Grid/>
+			</Provider>);
+		await waitForFluidConnection(sharedTreeConnection);
+
+		const blackCellsBefore = Array.from(container.querySelectorAll('.grid-item-black'));
+		const whiteCellCountInModelBefore = countCellsInModel(sharedTreeConnection, 1);
+
+		fireEvent.click(blackCellsBefore[0]);
+
+		await waitFor(() => {
+			const whiteCellCountInModelAfter = countCellsInModel(sharedTreeConnection, 1);
+			expect(whiteCellCountInModelAfter).equals(whiteCellCountInModelBefore + 1);
 		});
 	});
 });
