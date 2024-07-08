@@ -22,12 +22,18 @@ const waitForFluidConnection = async (sharedTreeConnection: SharedTreeConnection
 		expect(sharedTreeConnection.pixelEditorTreeView, "Ensure that tinylicious is running.").to.not.be.undefined;
 	});
 
-// TODO: Enum for kind
-const countCellsInModel = (sharedTreeConnection: SharedTreeConnection, kind: number) => {
+/**
+ * Count the number of cells stored in the backing Fluid Tree.
+ * @param sharedTreeConnection The Fluid Tree connection.
+ * @param kind Which kind of cell to count.
+ * @returns The number of matching cells.
+ */
+const countCellsInModel = (sharedTreeConnection: SharedTreeConnection, kind: 'black' | 'white') => {
 	assert(sharedTreeConnection.pixelEditorTreeView !== undefined, "Must be connected to Fluid.");
 	const treeView = sharedTreeConnection.pixelEditorTreeView as TreeView<typeof PixelEditorSchema>;
 	const cellValues = Array.from(treeView.root.board.values());
-	return cellValues.reduce((total, current) => total + (current === kind ? 1 : 0));
+	const kindValue = kind === 'black' ? 0 : 1;
+	return cellValues.reduce((total, current) => total + (current === kindValue ? 1 : 0));
 }
 
 describe("Tests for Grid", () => {
@@ -85,12 +91,12 @@ describe("Tests for Grid", () => {
 		await waitForFluidConnection(sharedTreeConnection);
 
 		const blackCellsBefore = Array.from(container.querySelectorAll('.grid-item-black'));
-		const whiteCellCountInModelBefore = countCellsInModel(sharedTreeConnection, 1);
+		const whiteCellCountInModelBefore = countCellsInModel(sharedTreeConnection, 'white');
 
 		fireEvent.click(blackCellsBefore[0]);
 
 		await waitFor(() => {
-			const whiteCellCountInModelAfter = countCellsInModel(sharedTreeConnection, 1);
+			const whiteCellCountInModelAfter = countCellsInModel(sharedTreeConnection, 'white');
 			expect(whiteCellCountInModelAfter).equals(whiteCellCountInModelBefore + 1);
 		});
 	});
