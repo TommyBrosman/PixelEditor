@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
 import './Grid.css';
-import { useAppDispatch, useAppSelector } from './store/Hooks';
+import { useAppDispatch, useRootSelector } from './store/Hooks';
 import { boardHeight, boardWidth } from './store/InitialItemBoard';
 import { Cell } from './Cell';
 import { connectToFluid, setCell } from './store/Reducers';
 
 export function Grid() {
-	const isLoaded = useAppSelector(state => state.app.isLoaded);
-	const itemBoard = useAppSelector(state => state.app.itemBoard);
+	const isLoaded = useRootSelector(state => state.app.isLoaded);
+	const itemBoard = useRootSelector(state => state.app.itemBoard);
 	const dispatch = useAppDispatch();
 
 	// Only connect once
