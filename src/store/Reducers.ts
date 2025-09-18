@@ -1,5 +1,5 @@
 import { Tree } from "fluid-framework";
-import { asyncThunkCreator, buildCreateSlice, type PayloadAction } from '@reduxjs/toolkit'
+import { asyncThunkCreator, buildCreateSlice, type PayloadAction } from "@reduxjs/toolkit"
 import { start, type SharedTreeConnection } from "./Model";
 import { type AppState, initialAppState } from "./State";
 

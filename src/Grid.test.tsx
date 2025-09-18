@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { assert, expect } from "chai";
 
 // eslint-disable-next-line import/no-unassigned-import
@@ -14,6 +14,8 @@ import { initialAppState } from "./store/State";
 
 /**
  * Wait for the thunk that connects to Fluid.
+ * @remarks
+ * We are relying a side-effect of `setupStore` to populate the connection object.
  * @param sharedTreeConnection The connection injected into the store.
  * @returns The promise to wait on.
  */
@@ -28,11 +30,11 @@ const waitForFluidConnection = async (sharedTreeConnection: SharedTreeConnection
  * @param kind Which kind of cell to count.
  * @returns The number of matching cells.
  */
-const countCellsInModel = (sharedTreeConnection: SharedTreeConnection, kind: 'black' | 'white') => {
+const countCellsInModel = (sharedTreeConnection: SharedTreeConnection, kind: "black" | "white") => {
 	assert(sharedTreeConnection.pixelEditorTreeView !== undefined, "Must be connected to Fluid.");
 	const treeView = sharedTreeConnection.pixelEditorTreeView as TreeView<typeof PixelEditorSchema>;
 	const cellValues = Array.from(treeView.root.board.values());
-	const kindValue = kind === 'black' ? 0 : 1;
+	const kindValue = kind === "black" ? 0 : 1;
 	return cellValues.reduce((total, current) => total + (current === kindValue ? 1 : 0));
 }
 
@@ -47,7 +49,7 @@ describe("Tests for Grid", () => {
 				<Grid/>
 			</Provider>);
 
-		const cells = Array.from(container.querySelectorAll('.grid-item-black,.grid-item-white'));
+		const cells = Array.from(container.querySelectorAll(".grid-item-black,.grid-item-white"));
 		expect(cells).length(boardWidth * boardHeight);
 	});
 
@@ -65,13 +67,13 @@ describe("Tests for Grid", () => {
 			</Provider>);
 		await waitForFluidConnection(sharedTreeConnection);
 
-		const blackCellsBefore = Array.from(container.querySelectorAll('.grid-item-black'));
-		const whiteCellsBefore = Array.from(container.querySelectorAll('.grid-item-white'));
+		const blackCellsBefore = Array.from(container.querySelectorAll(".grid-item-black"));
+		const whiteCellsBefore = Array.from(container.querySelectorAll(".grid-item-white"));
 
 		fireEvent.click(blackCellsBefore[0]);
 
 		await waitFor(() => {
-			const whiteCellsAfter = Array.from(container.querySelectorAll('.grid-item-white'));
+			const whiteCellsAfter = Array.from(container.querySelectorAll(".grid-item-white"));
 			expect(whiteCellsAfter).length(whiteCellsBefore.length + 1);
 		});
 	});
@@ -90,13 +92,13 @@ describe("Tests for Grid", () => {
 			</Provider>);
 		await waitForFluidConnection(sharedTreeConnection);
 
-		const blackCellsBefore = Array.from(container.querySelectorAll('.grid-item-black'));
-		const whiteCellCountInModelBefore = countCellsInModel(sharedTreeConnection, 'white');
+		const blackCellsBefore = Array.from(container.querySelectorAll(".grid-item-black"));
+		const whiteCellCountInModelBefore = countCellsInModel(sharedTreeConnection, "white");
 
 		fireEvent.click(blackCellsBefore[0]);
 
 		await waitFor(() => {
-			const whiteCellCountInModelAfter = countCellsInModel(sharedTreeConnection, 'white');
+			const whiteCellCountInModelAfter = countCellsInModel(sharedTreeConnection, "white");
 			expect(whiteCellCountInModelAfter).equals(whiteCellCountInModelBefore + 1);
 		});
 	});

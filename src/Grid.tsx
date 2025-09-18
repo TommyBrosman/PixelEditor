@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
-import './Grid.css';
-import { useAppDispatch, useRootSelector } from './store/Hooks';
-import { boardHeight, boardWidth } from './store/InitialItemBoard';
-import { Cell } from './Cell';
-import { connectToFluid, setCell } from './store/Reducers';
+import * as React from "react";
+import "./Grid.css";
+import { useAppDispatch, useRootSelector } from "./store/Hooks";
+import { boardHeight, boardWidth } from "./store/InitialItemBoard";
+import { Cell } from "./Cell";
+import { connectToFluid, setCell } from "./store/Reducers";
 
 export function Grid() {
 	const isLoaded = useRootSelector(state => state.app.isLoaded);
@@ -11,7 +11,7 @@ export function Grid() {
 	const dispatch = useAppDispatch();
 
 	// Only connect once
-	useEffect(() => {
+	React.useEffect(() => {
 		if (!isLoaded) {
 			dispatch(connectToFluid());
 		}

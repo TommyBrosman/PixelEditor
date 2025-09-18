@@ -24,6 +24,11 @@ module.exports = (env) => {
 					exclude: /node_modules/,
 				},
 				{
+					test: /\.[cm]?js$/,
+					use: [require.resolve("source-map-loader")],
+					enforce: "pre",
+				},
+				{
 					test: /\.css$/,
 					use: [
 						{
@@ -38,7 +43,9 @@ module.exports = (env) => {
 		},
 		resolve: {
 			extensionAlias: {
-				".js": [".ts", ".tsx", ".js", ".cjs", ".mjs"],
+				".js": [".ts", ".tsx", ".js"],
+				".cjs": [".cts", ".cjs"],
+				".mjs": [".mts", ".mjs"],
 			},
 			extensions: [".ts", ".tsx", ".js", ".cjs", ".mjs"],
 		},
